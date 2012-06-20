@@ -1,0 +1,7 @@
+higgsino
+========
+
+requirements:
+- sdecay http://www-itp.particle.uni-karlsruhe.de/~maggie/SDECAY/
+- softsusy http://softsusy.hepforge.org/
+- prospino http://www.thphys.uni-heidelberg.de/~plehn/index.php?show=prospino&visible=tools
