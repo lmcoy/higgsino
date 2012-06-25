@@ -1,21 +1,22 @@
 #!/bin/bash
+
+# path to software
 SOFTSUSY=/home/lo/Source/softsusy-3.3.1/softpoint.x
 SDECAY=/home/lo/Source/susyhit/2/run
 PROSPINO=./prospino_2.run
 PROSPINODIR=/home/lo/Source/on_the_web_3_26_12/
-DIR=${PWD} # aktuelles working dir ermitteln
-
+DIR=${PWD} # working directory 
 
 #------------------------------------------------------------------------------
-# Berechne branching ratios und Wirkungsquerschnitt für 
+# calculate branching ratios and cross section for 
 #     pp -> chi_2^0 chi_1^+ -> chi_1^0 Z chi_1^0 W+
 #
-# Die Funktion erwartet 5 Inputparameter
-# 1: Inputfile slha file. Die Strings __M1__, __M2__, __MU__ im Inputfile 
-#    werden in dieser Funktion durch neue Parameter ersetzt. Siehe andere 
-#    Parameter.
-# 2: Ausgabedatei. In diese Datei werden die Ergebnisse der Funktion
-#    zeilenweise geschrieben. Vorhandene Dateien werden überschrieben.
+# This function expects 5 input parameter
+# 1: Inputfile slha file. the strings __M1__, __M2__, __MU__ in inputfile 
+#    are replaced by other parameters. See other 
+#    parameter.
+# 2: output file. The results of this function are printed linewise in this
+#    file. This functions overwrites all existing files.
 #    Format: 
 #       M1 M2 mu N_{23}^2+N_{24}^2 m[chi_1^0] m[chi_2^0] m[chi_1^+] \
 #       br(chi_2^0->chi_1^0 Z) br(chi_1^+->chi_1^0 h )br(chi_1^+-> chi_1^0 W+) \
@@ -45,47 +46,47 @@ function E {
 	local M2=$4
 	local mu=$5
 	echo "Running with M1 = $M1, M2 = $M2, mu = $mu"
-	# Werte für M1, M2 und mu in input-Datei eintragen
+	# create an input file for softsusy from input file with parameters M1, M2, mu
 	sed "s/__M1__/$M1/g" < $1 | sed "s/__M2__/$M2/g" | sed "s/__MU__/$mu/g" > leshouches.in
 	# Massenspektrum mit softsusy berechnen
 	$SOFTSUSY leshouches < leshouches.in > SD_leshouches.in
-	# branching ratios mit sdecay berechnen
+	# calculate branching ratios with sdecay
 	rm -f sdecay_slha.out
 	$SDECAY
 
-	# Gesuchte Werte aus dem Resultat von sdecay auslesen
+	# read results from sdecay output
 	local IN=`./filter.awk sdecay_slha.out`
-	# Ist Higgsino & Zerfälle möglich?
+	# higgsino like?
 	if [ "$IN" != "" ]; then 
-		# Wirkungsquerschnitt mit Prospino berechnen
+		# calculate cross section with prospino
 		echo "Running prospino..."
 		cp sdecay_slha.out $PROSPINODIR/prospino.in.les_houches
-		cd $PROSPINODIR # Prospino muss in seinem Verzeichnis aufgerufen werden, um alle Dateien zu finden.
+		cd $PROSPINODIR # change to prospino directory so that prospino finds all needed files
 		$PROSPINO
-		# Der Wirkungsquerschnitt steht in der 1. Zeile von prospino.dat
+		# read cross section from first line of prospino.dat
 		local IN2=`head -n 1 prospino.dat | awk '{printf "%f",$10}'`
 		cd $DIR
 		echo "$M1 $M2 $mu $IN $IN2" >> $2
 	else
-		# Nicht relevanter Bereich => Setze alle Werte auf 0
+		# not higgsino like => set all values to 0.0
 		echo "$M1 $M2 $mu 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0" >> $2
 	fi
 }
 
-# Durchlaufe verschiedene Werte für mu, M1, M2
-# Schreibe Ergebnisse in Datei out{{Wert von mu}}.txt
-for m in {600..700..250}
+# use various values of mu, M1, M2
+# write results to out{{value of mu}}.txt
+for m in {350..1250..250}
 do
 	echo "# M1 M2 mu N_{23}^2+N_{24}^2 m[chi_1^0] m[chi_2^0] m[chi_1^+] br(chi_2^0->chi_1^0 Z) br(chi_1^+->chi_1^0 h) br(chi_1^+-> chi_1^0 W+) sigma" > "out/out$m.txt"
-	for m1 in {100..500..10} 
+	for m1 in {100..2000..100} 
 	do
-		for m2 in {500..3500..100}
+		for m2 in {100..4100..100}
 		do
 			E my.in "out/out$m.txt" $m1 $m2 $m
 		done
 		echo "" >> "out/out$m.txt"
 	done
-	# Plot erzeugen
+	# create plots
 	sed "s/__MU__/$m/g" < out.plot | gnuplot
 	sed "s/__MU__/$m/g" < outh.plot | gnuplot
 done

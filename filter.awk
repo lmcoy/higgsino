@@ -4,9 +4,9 @@ BEGIN {
 	n = 0.0
 }
 
-# N23 & N24 ausgeben
+# nmix block: N23 & N24 ausgeben
 $5 ~ /^N_/ && $1==2 && ($2==3 || $2==4) {
-		# Higgsino-Anteil der Neutralinos berechnen
+		# calc n_23^2 + n_24^2
 		n += $3^2
 }
 
@@ -16,7 +16,7 @@ $1 ~ /^DECAY/ && $2 == 1000024, $1 ~ /^DECAY/ && $2 != 1000024 {
 	#    print "~chi_1^+ decay"
 	#	printf "Width = %s\n", $3 
 	#}
-    # branching ratio des Zerfalls in chi_1^0 W+ ermitteln
+    # branching ratio in chi_1^0 W+ 
 	if( $3 == 1000022 && $4 == 24 ) {
 		br_W = $1
 	}
@@ -29,7 +29,7 @@ $1 ~ /^DECAY/ && $2 == 1000023, $1 ~ /^DECAY/ && $2 != 1000023 {
 	#	printf "Width = %s\n", $3 
 	#}
 
-# branching ratio des Zerfalls in chi_1^0 und Z ermitteln
+# branching ratio of chi_2^0 -> chi_1^0 Z/h 
 	if( $3 == 1000022 && $4 == 23 ) {
 		br_Z = $1
 	}
@@ -41,7 +41,7 @@ $1 ~ /^DECAY/ && $2 == 1000023, $1 ~ /^DECAY/ && $2 != 1000023 {
 	#}
 }
 
-# mass block ausgeben
+# mass block
 $1 ~ /^BLOCK/ && $2 ~/^MASS/, $1 ~ /^BLOCK/ && $2 !~ /^MASS/ {
 	# Massen der ersten Neutralinos und Charginos ermitteln
 	if( $1 == 1000023 ) {
@@ -62,7 +62,7 @@ END {
 	#printf "m Chargino 1+                  =    %f\n", m_chi1p
 	#printf "br(~chi_2^0 -> ~chi_1^0 Z)     =    %f\n", br_Z
 	#printf "br(~chi_1^+ -> ~chi_1^0 W+)    =    %f\n", br_W
-# Werte ausgeben, wenn higgsinoartige Neutralinos und Zerfall in W und Z möglich ist.
+# print values for higgsino like neutralinos if the decay in Z/h, W+ is possible.
 	if( n > 0.9 && (br_Z > 0 || br_h > 0) && br_W > 0 ) {
 		printf "% 8.4e % 8.4e %8.4e %8.4e % 8.4e % 8.4e % 8.4e", n, m_chi10, m_chi20, m_chi1p, br_Z, br_h, br_W
 	}
