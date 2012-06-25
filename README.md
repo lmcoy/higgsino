@@ -1,7 +1,7 @@
 higgsino
 ========
 
-script to calculate the cross section of pp -> chi_1+ chi_2^0 and the
+script for calculating the cross section of pp -> chi_1+ chi_2^0 and the
 branching ratios of the neutralino/chargino to h/Z, W+ for higgsino
 like neutralinos.
 
