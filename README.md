@@ -7,10 +7,10 @@ like neutralinos.
 
 usage
 -----
-a directory "out" must be present in the main directory.
-modify my.in
-modify script.sh (adapt for loops for mu,m1,m2)
-run script.sh
+- a directory "out" must be present in the main directory.
+- modify my.in
+- modify script.sh (adapt for loops for mu,m1,m2, path to software)
+- run script.sh
 
 results
 -------
